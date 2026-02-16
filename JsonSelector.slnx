@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/JsonSelector/JsonSelector.csproj" />
+  <Project Path="tests/JsonSelector.Tests/JsonSelector.Tests.csproj" />
+</Solution>

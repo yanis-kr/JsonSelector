@@ -77,13 +77,14 @@ jobs:
           script: |
             const linePct = '${{ steps.coverage.outputs.line_pct }}';
             const branchPct = '${{ steps.coverage.outputs.branch_pct }}';
-            const body = `## Test Coverage
-
-| Metric | Coverage |
-|--------|----------|
-| **Line** | ${linePct}% |
-| **Branch** | ${branchPct}% |
-`;
+            const body = [
+              '## Test Coverage',
+              '',
+              '| Metric | Coverage |',
+              '|--------|----------|',
+              '| **Line** | ' + linePct + '% |',
+              '| **Branch** | ' + branchPct + '% |'
+            ].join('\n');
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,

@@ -1,12 +1,12 @@
 # JsonSelector
 
-A lightweight .NET library for querying JSON payloads using [JSONPath](https://www.rfc-editor.org/rfc/rfc9535.html) expressions. Implements a subset of [RFC 9535 (JSONPath: Query Expressions for JSON)](https://www.rfc-editor.org/rfc/rfc9535.html).
+A lightweight .NET library for querying JSON payloads using [JSONPath](https://www.rfc-editor.org/rfc/rfc9535.html) expressions. Implements a subset of [RFC 9535 (JSONPath: Query Expressions for JSON)](https://www.rfc-editor.org/rfc/rfc9535.html). No external JSONPath dependencies—built on `System.Text.Json` only.
 
 ## Features
 
 - **Any** — Check if a selector matches at least one node
-- **FirstString** — Extract the first matching value as string
-- **FirstInt** — Extract the first matching value as int
+- **FirstString** — Extract the first matching value as string (numbers use invariant culture)
+- **FirstInt** — Extract the first matching value as int (supports numeric and string values)
 
 ## Supported JSONPath Features
 
@@ -29,7 +29,21 @@ A lightweight .NET library for querying JSON payloads using [JSONPath](https://w
 
 ## Installation
 
-Add a project reference to the JsonSelector project:
+**NuGet (GitHub Packages):**
+
+```bash
+dotnet add package JsonSelector
+```
+
+Add the GitHub Packages source to `nuget.config` if needed:
+
+```xml
+<packageSources>
+  <add key="github" value="https://nuget.pkg.github.com/YOUR_ORG/index.json" />
+</packageSources>
+```
+
+**Project reference:**
 
 ```xml
 <ProjectReference Include="path\to\src\JsonSelector\JsonSelector.csproj" />

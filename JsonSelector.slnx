@@ -1,4 +1,11 @@
 <Solution>
-  <Project Path="src/JsonSelector/JsonSelector.csproj" />
-  <Project Path="tests/JsonSelector.Tests/JsonSelector.Tests.csproj" />
+  <Folder Name="/Solution items/">
+    <File Path=".github/workflows/publish-nuget.yml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/JsonSelector/JsonSelector.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/JsonSelector.Tests/JsonSelector.Tests.csproj" />
+  </Folder>
 </Solution>

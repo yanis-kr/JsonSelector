@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       version:
@@ -60,6 +62,7 @@ jobs:
   publish-github-packages:
     needs: build-and-pack
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     permissions:
       packages: write
     steps:
@@ -80,7 +83,7 @@ jobs:
   publish-nuget-org:
     needs: build-and-pack
     runs-on: ubuntu-latest
-    if: github.event.inputs.publish_nuget_org == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+    if: github.event_name != 'pull_request' && (github.event.inputs.publish_nuget_org == 'true' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')))
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4

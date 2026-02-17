@@ -1,5 +1,7 @@
 <Solution>
-  <Folder Name="/Solution items/" />
+  <Folder Name="/Solution items/">
+    <File Path=".github/workflows/publish-nuget.yml" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/JsonSelector/JsonSelector.csproj" />
   </Folder>

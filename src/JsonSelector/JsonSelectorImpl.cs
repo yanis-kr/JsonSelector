@@ -1,7 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Json.Path;
-using JsonPathQuery = Json.Path.JsonPath;
 
 namespace JsonSelector;
 
@@ -9,12 +7,12 @@ internal sealed class JsonSelectorImpl : IJsonSelector
 {
     public bool Any(string json, string selector)
     {
-        JsonPathQuery? path = ParsePath(selector);
+        var path = JsonPathParser.Parse(selector);
         if (path is null) return false;
         JsonNode? node = ParseJson(json);
         if (node is null) return false;
-        PathResult result = path.Evaluate(node);
-        return result.Matches is not null && result.Matches.Any();
+        var matches = JsonPathEvaluator.Evaluate(path, node);
+        return matches.Any(m => m is not null);
     }
 
     public string? FirstString(string json, string selector)
@@ -52,22 +50,12 @@ internal sealed class JsonSelectorImpl : IJsonSelector
         catch (JsonException) { return null; }
     }
 
-    private static JsonPathQuery? ParsePath(string selector)
-    {
-        if (string.IsNullOrWhiteSpace(selector)) return null;
-        string normalized = selector.Trim().StartsWith('$') ? selector.Trim()
-            : selector.Trim().StartsWith('.') ? "$" + selector.Trim() : "$." + selector.Trim();
-        try { return JsonPathQuery.Parse(normalized); }
-        catch { return null; }
-    }
-
     private static JsonNode? FirstValue(string json, string selector)
     {
-        JsonPathQuery? path = ParsePath(selector);
+        var path = JsonPathParser.Parse(selector);
         if (path is null) return null;
         JsonNode? node = ParseJson(json);
         if (node is null) return null;
-        PathResult result = path.Evaluate(node);
-        return result.Matches?.FirstOrDefault()?.Value;
+        return JsonPathEvaluator.Evaluate(path, node).FirstOrDefault();
     }
 }

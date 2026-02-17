@@ -1,12 +1,31 @@
 # JsonSelector
 
-A lightweight .NET library for querying JSON payloads using [JSONPath](https://www.rfc-editor.org/rfc/rfc9535.html) expressions (RFC 9535). Supports simple paths and filter expressions for eligibility checks and value extraction.
+A lightweight .NET library for querying JSON payloads using [JSONPath](https://www.rfc-editor.org/rfc/rfc9535.html) expressions. Implements a subset of [RFC 9535 (JSONPath: Query Expressions for JSON)](https://www.rfc-editor.org/rfc/rfc9535.html).
 
 ## Features
 
 - **Any** — Check if a selector matches at least one node
 - **FirstString** — Extract the first matching value as string
 - **FirstInt** — Extract the first matching value as int
+
+## Supported JSONPath Features
+
+- Root selector `$`
+- Child selector `.name`
+- Bracket notation for filters `[?()]`
+- Filter expressions: `@.field`, `==`, `!=`, `&&`, `||`, single-quoted strings
+- `isOneOf(@.field, 'a','b','c')` for multiple-value matching
+
+## Path and Selector Examples
+
+| Selector | Description |
+|----------|-------------|
+| `$.id` | Root property |
+| `$.data.name` | Nested property |
+| `$.items[?(@.kind=='x')]` | Array elements matching filter |
+| `$.items[?(@.a=='1' && @.b=='2')]` | Filter with AND |
+| `$.items[?(@.kind=='x' && (@.code=='10' \|\| @.code=='30'))]` | Filter with OR |
+| `$.items[?(@.kind=='x' && isOneOf(@.code, '10','30'))]` | Filter with isOneOf |
 
 ## Installation
 
@@ -28,11 +47,17 @@ services.AddJsonSelector();
 var selector = serviceProvider.GetRequiredService<IJsonSelector>();
 
 // Check if path exists
-bool exists = selector.Any(json, "$.account");
+bool exists = selector.Any(json, "$.id");
 
 // Extract values
-string? accountId = selector.FirstString(json, "$.accountId");
-int? tranCode = selector.FirstInt(json, "$.journalEntries[?(@.entryType=='credit')].tranCode");
+string? name = selector.FirstString(json, "$.name");
+int? code = selector.FirstInt(json, "$.items[?(@.kind=='x')].code");
+
+// Multiple-value filter (OR)
+bool hasMatch = selector.Any(json, "$.items[?(@.kind=='x' && (@.code=='10' || @.code=='30'))]");
+
+// Multiple-value filter (isOneOf)
+string? id = selector.FirstString(json, "$.items[?(@.kind=='x' && isOneOf(@.code, '10','20'))].id");
 ```
 
 ## Requirements

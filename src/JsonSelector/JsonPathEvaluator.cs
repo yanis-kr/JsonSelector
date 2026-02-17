@@ -2,8 +2,15 @@ using System.Text.Json.Nodes;
 
 namespace JsonSelector;
 
+/// <summary>Evaluates parsed JSONPath segments against a JSON document.</summary>
 internal static class JsonPathEvaluator
 {
+    /// <summary>
+    /// Evaluates a path against a JSON root node and returns all matching nodes.
+    /// </summary>
+    /// <param name="path">The parsed path segments.</param>
+    /// <param name="root">The root JSON node (typically the document).</param>
+    /// <returns>All nodes that match the path, in document order.</returns>
     public static IEnumerable<JsonNode?> Evaluate(IReadOnlyList<PathSegment> path, JsonNode? root)
     {
         if (path.Count == 0) return [root];

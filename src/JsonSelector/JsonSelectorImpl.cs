@@ -3,8 +3,10 @@ using System.Text.Json.Nodes;
 
 namespace JsonSelector;
 
+/// <summary>Default implementation of <see cref="IJsonSelector"/> using a custom JSONPath engine.</summary>
 internal sealed class JsonSelectorImpl : IJsonSelector
 {
+    /// <inheritdoc />
     public bool Any(string json, string selector)
     {
         var path = JsonPathParser.Parse(selector);
@@ -15,6 +17,7 @@ internal sealed class JsonSelectorImpl : IJsonSelector
         return matches.Any(m => m is not null);
     }
 
+    /// <inheritdoc />
     public string? FirstString(string json, string selector)
     {
         JsonNode? value = FirstValue(json, selector);
@@ -29,6 +32,7 @@ internal sealed class JsonSelectorImpl : IJsonSelector
         };
     }
 
+    /// <inheritdoc />
     public int? FirstInt(string json, string selector)
     {
         JsonNode? value = FirstValue(json, selector);

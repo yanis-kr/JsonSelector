@@ -1,13 +1,22 @@
 namespace JsonSelector;
 
+/// <summary>Base type for a JSONPath path segment.</summary>
 internal abstract record PathSegment;
 
+/// <summary>Child property selector (e.g. <c>.name</c>).</summary>
 internal sealed record ChildSegment(string Name) : PathSegment;
 
+/// <summary>Filter selector (e.g. <c>[?(@.kind=='x')]</c>).</summary>
 internal sealed record FilterSegment(string Expression) : PathSegment;
 
+/// <summary>Parses JSONPath selector strings into a sequence of path segments.</summary>
 internal static class JsonPathParser
 {
+    /// <summary>
+    /// Parses a JSONPath selector into path segments.
+    /// </summary>
+    /// <param name="selector">The selector string (e.g. <c>$.id</c>, <c>$.items[?(@.kind=='x')].id</c>).</param>
+    /// <returns>The parsed segments, or <c>null</c> if the selector is invalid.</returns>
     public static IReadOnlyList<PathSegment>? Parse(string selector)
     {
         if (string.IsNullOrWhiteSpace(selector)) return null;

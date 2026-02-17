@@ -2,20 +2,33 @@ using System.Text.Json.Nodes;
 
 namespace JsonSelector;
 
+/// <summary>Base type for a filter expression node.</summary>
 internal abstract record FilterNode;
 
+/// <summary>Comparison expression (e.g. <c>==</c>, <c>!=</c>).</summary>
 internal sealed record FilterComparison(FilterNode Left, string Op, FilterNode Right) : FilterNode;
 
+/// <summary>Logical expression (e.g. <c>&amp;&amp;</c>, <c>||</c>).</summary>
 internal sealed record FilterLogical(FilterNode Left, string Op, FilterNode Right) : FilterNode;
 
+/// <summary>Path expression (e.g. <c>@.field</c>).</summary>
 internal sealed record FilterPath(string[] Segments) : FilterNode;
 
+/// <summary>String literal in single quotes.</summary>
 internal sealed record FilterStringLiteral(string Value) : FilterNode;
 
+/// <summary>isOneOf function: value equals any of the given strings.</summary>
 internal sealed record FilterIsOneOf(FilterPath Path, IReadOnlyList<string> Values) : FilterNode;
 
+/// <summary>Parses and evaluates filter expressions within JSONPath selectors.</summary>
 internal static class FilterExpressionParser
 {
+    /// <summary>
+    /// Parses a filter expression string into an expression tree.
+    /// </summary>
+    /// <param name="expression">The filter expression (e.g. <c>@.kind=='x' &amp;&amp; @.code=='10'</c>).</param>
+    /// <param name="currentContext">Unused; reserved for future context-aware parsing.</param>
+    /// <returns>The parsed expression, or <c>null</c> if invalid.</returns>
     public static FilterNode? Parse(string expression, JsonNode? currentContext)
     {
         if (string.IsNullOrWhiteSpace(expression)) return null;
@@ -185,6 +198,12 @@ internal static class FilterExpressionParser
         return s.Replace("\\'", "'").Replace("\\\\", "\\");
     }
 
+    /// <summary>
+    /// Evaluates a filter expression against a JSON node.
+    /// </summary>
+    /// <param name="node">The parsed filter expression.</param>
+    /// <param name="context">The current JSON node (e.g. array element) to evaluate against.</param>
+    /// <returns><c>true</c> if the filter matches; otherwise <c>false</c>.</returns>
     public static bool Evaluate(FilterNode node, JsonNode? context)
     {
         return node switch

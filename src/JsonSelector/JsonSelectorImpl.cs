@@ -21,9 +21,7 @@ internal sealed class JsonSelectorImpl : IJsonSelector
     public string? FirstString(string json, string selector)
     {
         JsonNode? value = FirstValue(json, selector);
-        if (value is null) return null;
-        JsonValue? jv = value.AsValue();
-        if (jv is null) return null;
+        if (value is not JsonValue jv) return null;
         return jv.GetValueKind() switch
         {
             JsonValueKind.String => jv.GetValue<string>(),
@@ -36,9 +34,7 @@ internal sealed class JsonSelectorImpl : IJsonSelector
     public int? FirstInt(string json, string selector)
     {
         JsonNode? value = FirstValue(json, selector);
-        if (value is null) return null;
-        JsonValue? jv = value.AsValue();
-        if (jv is null) return null;
+        if (value is not JsonValue jv) return null;
         return jv.GetValueKind() switch
         {
             JsonValueKind.Number => (int)jv.GetValue<decimal>(),

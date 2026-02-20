@@ -39,6 +39,14 @@ internal static class JsonPathEvaluator
             return candidates.SelectMany(n => EvaluateFrom(path, index + 1, n));
         }
 
+        if (seg is IndexSegment indexSeg)
+        {
+            var nextNodes = ResolveIndex(current, indexSeg.Index);
+            if (index + 1 >= path.Count)
+                return nextNodes;
+            return nextNodes.SelectMany(n => EvaluateFrom(path, index + 1, n));
+        }
+
         return [];
     }
 
@@ -66,5 +74,18 @@ internal static class JsonPathEvaluator
                 results.Add(item);
         }
         return results;
+    }
+
+    private static IEnumerable<JsonNode?> ResolveIndex(JsonNode? node, int index)
+    {
+        if (node is not JsonArray arr)
+            return [];
+
+        int effectiveIndex = index >= 0 ? index : arr.Count + index;
+        if (effectiveIndex < 0 || effectiveIndex >= arr.Count)
+            return [];
+
+        var item = arr[effectiveIndex];
+        return [item];
     }
 }

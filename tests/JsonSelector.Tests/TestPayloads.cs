@@ -38,4 +38,16 @@ internal static class TestPayloads
           }
         }
         """;
+
+    public const string IndexPayload = """
+        {
+          "data": {
+            "myArray": [
+              { "myItem": "first" },
+              { "myItem": "second" },
+              { "myItem": "third" }
+            ]
+          }
+        }
+        """;
 }

@@ -12,6 +12,7 @@ A lightweight .NET library for querying JSON payloads using [JSONPath](https://w
 
 - Root selector `$`
 - Child selector `.name`
+- Index selector `[0]`, `[1]`, `[-1]` (negative index = from end)
 - Bracket notation for filters `[?()]`
 - Filter expressions: `@.field`, `==`, `!=`, `&&`, `||`, single-quoted strings
 - `isOneOf(@.field, 'a','b','c')` for multiple-value matching
@@ -22,6 +23,8 @@ A lightweight .NET library for querying JSON payloads using [JSONPath](https://w
 |----------|-------------|
 | `$.id` | Root property |
 | `$.data.name` | Nested property |
+| `$.data.myArray[0].myItem` | Array element by index |
+| `$.items[-1].id` | Last array element (negative index) |
 | `$.items[?(@.kind=='x')]` | Array elements matching filter |
 | `$.items[?(@.a=='1' && @.b=='2')]` | Filter with AND |
 | `$.items[?(@.kind=='x' && (@.code=='10' \|\| @.code=='30'))]` | Filter with OR |
@@ -72,6 +75,10 @@ bool hasMatch = selector.Any(json, "$.items[?(@.kind=='x' && (@.code=='10' || @.
 
 // Multiple-value filter (isOneOf)
 string? id = selector.FirstString(json, "$.items[?(@.kind=='x' && isOneOf(@.code, '10','20'))].id");
+
+// Array index (first, last, by position)
+string? first = selector.FirstString(json, "$.data.myArray[0].myItem");
+string? last = selector.FirstString(json, "$.data.myArray[-1].myItem");
 ```
 
 ## Requirements

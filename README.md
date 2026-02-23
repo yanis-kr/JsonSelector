@@ -53,7 +53,7 @@ int? code = selector.FirstInt(json, "$.items[0].code");        // 10
 - **Child selector** — `.name`
 - **Index selector** — `[0]`, `[1]`, `[-1]` (negative index = from end)
 - **Bracket notation for filters** — `[?()]`
-- **Filter expressions** — `@.field`, `==`, `!=`, `&&`, `||`, single-quoted strings
+- **Filter expressions** — `@.field`, `==`, `!=`, `>=`, `>`, `<=`, `<`, `&&`, `||`, single-quoted strings, numeric literals
 - **isOneOf** — `isOneOf(@.field, 'a','b','c')` for multiple-value matching
 
 ---
@@ -70,6 +70,9 @@ int? code = selector.FirstInt(json, "$.items[0].code");        // 10
 | `$.items[?(@.a=='1' && @.b=='2')]` | Filter with AND |
 | `$.items[?(@.kind=='x' && (@.code=='10' \|\| @.code=='30'))]` | Filter with OR |
 | `$.items[?(@.kind=='x' && isOneOf(@.code, '10','30'))]` | Filter with isOneOf |
+| `$.node1.node2 == 'match'` | Path value equals (non-array) |
+| `$.node1.node2 != 'match'` | Path value not equals |
+| `$.count >= 5` | Path value comparison (>=, >, <=, <) |
 
 ---
 
@@ -128,6 +131,10 @@ string json = """
 
 // Check if path exists
 bool exists = selector.Any(json, "$.id");
+
+// Check if path value matches (non-array paths)
+bool nameMatches = selector.Any(json, "$.name == 'alpha'");
+bool idInRange = selector.Any(json, "$.id >= 1000");
 
 // Extract values
 string? name = selector.FirstString(json, "$.name");

@@ -12,6 +12,17 @@ public sealed class AnyTests
     [InlineData("$.name", true)]
     [InlineData("$.missing", false)]
     [InlineData("$.tags", true)]
+    [InlineData("$.name == 'alpha'", true)]
+    [InlineData("$.name == 'beta'", false)]
+    [InlineData("$.name != 'beta'", true)]
+    [InlineData("$.name != 'alpha'", false)]
+    [InlineData("$.id == 1001", true)]
+    [InlineData("$.id >= 1001", true)]
+    [InlineData("$.id >= 1000", true)]
+    [InlineData("$.id > 1000", true)]
+    [InlineData("$.id < 1002", true)]
+    [InlineData("$.id <= 1001", true)]
+    [InlineData("$.missing == 'x'", false)]
     public void Any_WithSimplePayload_ReturnsExpected(string selector, bool expected) =>
         _sut.Any(TestPayloads.SimplePayload, selector).Should().Be(expected);
 
@@ -24,6 +35,10 @@ public sealed class AnyTests
 
     [Theory]
     [InlineData("$.items", true)]
+    [InlineData("$.items[?(@.code >= 10)]", true)]
+    [InlineData("$.items[?(@.code > 25)]", true)]
+    [InlineData("$.items[?(@.code < 15)]", true)]
+    [InlineData("$.items[?(@.code >= 100)]", false)]
     [InlineData("$.items[?(@.kind=='x')]", true)]
     [InlineData("$.items[?(@.kind=='y')]", true)]
     [InlineData("$.items[?(@.kind=='z')]", false)]
@@ -41,6 +56,9 @@ public sealed class AnyTests
     [InlineData("$.data.id", true)]
     [InlineData("$.data.items", true)]
     [InlineData("$.data.missing", false)]
+    [InlineData("$.data.id == 1001", true)]
+    [InlineData("$.data.id >= 1000", true)]
+    [InlineData("$.data.id == 999", false)]
     public void Any_WithNestedPayload_ReturnsExpected(string selector, bool expected) =>
         _sut.Any(TestPayloads.NestedPayload, selector).Should().Be(expected);
 

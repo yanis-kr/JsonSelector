@@ -17,6 +17,9 @@ internal sealed record FilterPath(string[] Segments) : FilterNode;
 /// <summary>String literal in single quotes.</summary>
 internal sealed record FilterStringLiteral(string Value) : FilterNode;
 
+/// <summary>Numeric literal for comparisons.</summary>
+internal sealed record FilterNumericLiteral(string Value) : FilterNode;
+
 /// <summary>isOneOf function: value equals any of the given strings.</summary>
 internal sealed record FilterIsOneOf(FilterPath Path, IReadOnlyList<string> Values) : FilterNode;
 
@@ -103,6 +106,34 @@ internal static class FilterExpressionParser
             if (right is null) return null;
             return new FilterComparison(left, "!=", right);
         }
+        if (s.StartsWith(">="))
+        {
+            s = s[2..].TrimStart();
+            var right = ParsePrimary(ref s, ctx);
+            if (right is null) return null;
+            return new FilterComparison(left, ">=", right);
+        }
+        if (s.StartsWith(">") && (s.Length == 1 || s[1] != '='))
+        {
+            s = s[1..].TrimStart();
+            var right = ParsePrimary(ref s, ctx);
+            if (right is null) return null;
+            return new FilterComparison(left, ">", right);
+        }
+        if (s.StartsWith("<="))
+        {
+            s = s[2..].TrimStart();
+            var right = ParsePrimary(ref s, ctx);
+            if (right is null) return null;
+            return new FilterComparison(left, "<=", right);
+        }
+        if (s.StartsWith("<") && (s.Length == 1 || s[1] != '='))
+        {
+            s = s[1..].TrimStart();
+            var right = ParsePrimary(ref s, ctx);
+            if (right is null) return null;
+            return new FilterComparison(left, "<", right);
+        }
 
         return left;
     }
@@ -167,6 +198,21 @@ internal static class FilterExpressionParser
             return null;
         }
 
+        if (s.Length > 0 && (s[0] == '-' || char.IsDigit(s[0])))
+        {
+            int start = 0;
+            int i = s[0] == '-' ? 1 : 0;
+            if (i >= s.Length || !char.IsDigit(s[i])) return null;
+            while (i < s.Length && (char.IsDigit(s[i]) || s[i] == '.')) i++;
+            string value = s[start..i].ToString();
+            if (decimal.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
+            {
+                s = s[i..];
+                return new FilterNumericLiteral(value);
+            }
+            return null;
+        }
+
         if (s.StartsWith("@."))
         {
             var segments = new List<string>();
@@ -223,12 +269,23 @@ internal static class FilterExpressionParser
             return c.Op == "==";
         if (leftVal is null || rightVal is null)
             return c.Op == "!=";
-        return c.Op switch
+        if (c.Op is "==" or "!=")
+            return c.Op switch { "==" => leftVal == rightVal, "!=" => leftVal != rightVal, _ => false };
+        if (c.Op is ">=" or ">" or "<=" or "<")
         {
-            "==" => leftVal == rightVal,
-            "!=" => leftVal != rightVal,
-            _ => false
-        };
+            if (!decimal.TryParse(leftVal, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal leftNum) ||
+                !decimal.TryParse(rightVal, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal rightNum))
+                return false;
+            return c.Op switch
+            {
+                ">=" => leftNum >= rightNum,
+                ">" => leftNum > rightNum,
+                "<=" => leftNum <= rightNum,
+                "<" => leftNum < rightNum,
+                _ => false
+            };
+        }
+        return false;
     }
 
     private static bool EvalLogical(FilterLogical l, JsonNode? context)
@@ -266,6 +323,8 @@ internal static class FilterExpressionParser
             return GetPathValue(p, context);
         if (node is FilterStringLiteral s)
             return s.Value;
+        if (node is FilterNumericLiteral n)
+            return n.Value;
         return null;
     }
 

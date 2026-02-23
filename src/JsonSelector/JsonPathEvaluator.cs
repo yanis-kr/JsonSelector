@@ -100,44 +100,7 @@ internal static class JsonPathEvaluator
 
     private static bool ValuePredicateMatches(JsonNode? node, ValuePredicateSegment pred)
     {
-        string? nodeVal = NodeToString(node);
-        string rightVal = pred.Value;
-
-        if (pred.Op is "==" or "!=")
-        {
-            bool eq = nodeVal == rightVal;
-            return pred.Op == "==" ? eq : !eq;
-        }
-
-        if (pred.Op is ">=" or ">" or "<=" or "<")
-        {
-            if (!decimal.TryParse(nodeVal, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal leftNum) ||
-                !decimal.TryParse(rightVal, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal rightNum))
-                return false;
-            return pred.Op switch
-            {
-                ">=" => leftNum >= rightNum,
-                ">" => leftNum > rightNum,
-                "<=" => leftNum <= rightNum,
-                "<" => leftNum < rightNum,
-                _ => false
-            };
-        }
-        return false;
-    }
-
-    private static string? NodeToString(JsonNode? node)
-    {
-        if (node is null) return null;
-        if (node is JsonValue jv)
-        {
-            return jv.GetValueKind() switch
-            {
-                System.Text.Json.JsonValueKind.String => jv.GetValue<string>(),
-                System.Text.Json.JsonValueKind.Number => jv.GetValue<decimal>().ToString(System.Globalization.CultureInfo.InvariantCulture),
-                _ => node.ToString()
-            };
-        }
-        return node.ToString();
+        string? nodeVal = JsonValueComparer.NodeToString(node);
+        return JsonValueComparer.ApplyComparison(nodeVal, pred.Value, pred.Op);
     }
 }

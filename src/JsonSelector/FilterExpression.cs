@@ -265,27 +265,7 @@ internal static class FilterExpressionParser
     {
         string? leftVal = GetValue(c.Left, context);
         string? rightVal = GetValue(c.Right, context);
-        if (leftVal is null && rightVal is null)
-            return c.Op == "==";
-        if (leftVal is null || rightVal is null)
-            return c.Op == "!=";
-        if (c.Op is "==" or "!=")
-            return c.Op switch { "==" => leftVal == rightVal, "!=" => leftVal != rightVal, _ => false };
-        if (c.Op is ">=" or ">" or "<=" or "<")
-        {
-            if (!decimal.TryParse(leftVal, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal leftNum) ||
-                !decimal.TryParse(rightVal, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal rightNum))
-                return false;
-            return c.Op switch
-            {
-                ">=" => leftNum >= rightNum,
-                ">" => leftNum > rightNum,
-                "<=" => leftNum <= rightNum,
-                "<" => leftNum < rightNum,
-                _ => false
-            };
-        }
-        return false;
+        return JsonValueComparer.ApplyComparison(leftVal, rightVal, c.Op);
     }
 
     private static bool EvalLogical(FilterLogical l, JsonNode? context)
@@ -338,21 +318,6 @@ internal static class FilterExpressionParser
             else
                 return null;
         }
-        return NodeToString(node);
-    }
-
-    private static string? NodeToString(JsonNode? node)
-    {
-        if (node is null) return null;
-        if (node is JsonValue jv)
-        {
-            return jv.GetValueKind() switch
-            {
-                System.Text.Json.JsonValueKind.String => jv.GetValue<string>(),
-                System.Text.Json.JsonValueKind.Number => jv.GetValue<decimal>().ToString(System.Globalization.CultureInfo.InvariantCulture),
-                _ => node.ToString()
-            };
-        }
-        return node.ToString();
+        return JsonValueComparer.NodeToString(node);
     }
 }

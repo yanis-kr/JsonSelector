@@ -12,6 +12,9 @@ internal sealed record FilterSegment(string Expression) : PathSegment;
 /// <summary>Index selector (e.g. <c>[0]</c>, <c>[1]</c>, <c>[-1]</c> for last element).</summary>
 internal sealed record IndexSegment(int Index) : PathSegment;
 
+/// <summary>Value predicate on path result (e.g. <c>== 'match'</c>, <c>!= 'x'</c>, <c>>= 5</c>).</summary>
+internal sealed record ValuePredicateSegment(string Op, string Value) : PathSegment;
+
 /// <summary>Parses JSONPath selector strings into a sequence of path segments.</summary>
 internal static class JsonPathParser
 {
@@ -81,11 +84,70 @@ internal static class JsonPathParser
             }
             else
             {
+                if (segments.Count > 0)
+                {
+                    while (i < normalized.Length && char.IsWhiteSpace(normalized[i])) i++;
+                    if (i < normalized.Length)
+                    {
+                        var predicate = TryParseValuePredicate(normalized, ref i);
+                        if (predicate is not null && i >= normalized.Length)
+                        {
+                            segments.Add(predicate);
+                            return segments;
+                        }
+                    }
+                }
                 return null;
             }
         }
 
         return segments;
+    }
+
+    private static ValuePredicateSegment? TryParseValuePredicate(string s, ref int i)
+    {
+        if (i >= s.Length) return null;
+        string? op = null;
+        if (s.Length > i + 2 && s[i] == '=' && s[i + 1] == '=') { op = "=="; i += 2; }
+        else if (s.Length > i + 2 && s[i] == '!' && s[i + 1] == '=') { op = "!="; i += 2; }
+        else if (s.Length > i + 2 && s[i] == '>' && s[i + 1] == '=') { op = ">="; i += 2; }
+        else if (s.Length > i + 1 && s[i] == '>') { op = ">"; i += 1; }
+        else if (s.Length > i + 2 && s[i] == '<' && s[i + 1] == '=') { op = "<="; i += 2; }
+        else if (s.Length > i + 1 && s[i] == '<') { op = "<"; i += 1; }
+        if (op is null) return null;
+
+        while (i < s.Length && char.IsWhiteSpace(s[i])) i++;
+        if (i >= s.Length) return null;
+
+        if (s[i] == '\'')
+        {
+            int end = i + 1;
+            while (end < s.Length)
+            {
+                if (s[end] == '\\' && end + 1 < s.Length)
+                    end += 2;
+                else if (s[end] == '\'')
+                {
+                    string value = s[(i + 1)..end].Replace("\\'", "'").Replace("\\\\", "\\");
+                    i = end + 1;
+                    return new ValuePredicateSegment(op, value);
+                }
+                else
+                    end++;
+            }
+            return null;
+        }
+
+        if (s[i] == '-' || char.IsDigit(s[i]))
+        {
+            int start = i;
+            if (s[i] == '-') i++;
+            while (i < s.Length && (char.IsDigit(s[i]) || s[i] == '.')) i++;
+            string value = s[start..i];
+            if (decimal.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
+                return new ValuePredicateSegment(op, value);
+        }
+        return null;
     }
 
     private static string ReadIdentifier(string s, ref int i)

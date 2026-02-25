@@ -4,30 +4,22 @@
 
 ### Overview
 
-JsonSelector is a .NET 8 library for querying JSON via JSONPath (RFC 9535 subset). It has one library project and one xUnit test project. No databases, Docker, or external services are required.
+JsonSelector is a .NET 10 library for querying JSON via JSONPath (RFC 9535 subset). It has one library project and one xUnit test project. No databases, Docker, or external services are required.
 
 ### .NET SDK
 
-.NET 8 SDK is installed at `$HOME/.dotnet`. The `PATH` and `DOTNET_ROOT` are configured in `~/.bashrc`.
-
-### Solution file caveat
-
-The repo uses `.slnx` (XML-based solution format) which requires .NET 9+. Since the project targets `net8.0`, build and test the `.csproj` files directly:
-
-```
-dotnet build src/JsonSelector/JsonSelector.csproj
-dotnet build tests/JsonSelector.Tests/JsonSelector.Tests.csproj
-dotnet test tests/JsonSelector.Tests/JsonSelector.Tests.csproj
-```
+.NET 10 SDK is installed at `$HOME/.dotnet`. The `PATH` and `DOTNET_ROOT` are configured in `~/.bashrc`.
 
 ### Key commands
 
 | Action | Command |
 |--------|---------|
-| Restore | `dotnet restore src/JsonSelector/JsonSelector.csproj && dotnet restore tests/JsonSelector.Tests/JsonSelector.Tests.csproj` |
-| Build | `dotnet build tests/JsonSelector.Tests/JsonSelector.Tests.csproj` (builds library transitively) |
-| Test | `dotnet test tests/JsonSelector.Tests/JsonSelector.Tests.csproj` |
+| Restore | `dotnet restore` |
+| Build | `dotnet build` |
+| Test | `dotnet test` |
 | Pack | `dotnet pack src/JsonSelector/JsonSelector.csproj -c Release` |
+
+The repo uses `.slnx` solution format (supported by .NET 9+). All standard `dotnet` commands work at the repo root.
 
 ### API usage note
 

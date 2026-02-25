@@ -1,6 +1,6 @@
 # JsonSelector
 
-[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/yanis-kr/JsonSelector)
 
@@ -155,7 +155,7 @@ string? last = selector.FirstString(json, "$.items[-1].id");
 
 ## Requirements
 
-- .NET 8.0
+- .NET 10.0
 
 ---
 
